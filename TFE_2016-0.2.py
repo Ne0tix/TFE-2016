@@ -73,38 +73,29 @@ class Map(game):
         game.__init__(self)
         self.buildObject(self.carte)
 
-class Batiment(game):
-
+class Batiment(pygame.sprite.Sprite):
+    images = []
     def __init__(self, bat):
-        game.__init__(self)
-        self.build = bat
-        self.buildObject(self.build)
-        self.posX = 0
-        self.posY = 0
+        pygame.sprite.Sprite.__init__(self)
+        self.image = self.images[0]
+        self.rect = self.image.get_rect(midbottom=SCREENRECT.midbottom)
+        
     
     def buildMove(self):
         for event in pygame.event.get():
             if event.type == KEYDOWN:
                 if event.key == K_RIGHT:
                     print('move RIGHT')
-                    self.removeObject(self.build, self.posX, self.posY)
-                    self.posX += 1
-                    self.buildObject(self.build, self.posX, self.posY)
+                    self.rect.move(1*TAILLE_BLOCK[1],0)
                 if event.key == K_LEFT:
                     print('move LEFT')
-                    self.removeObject(self.build, self.posX, self.posY)
-                    self.posX -= 1
-                    self.buildObject(self.build, self.posX, self.posY)
+                    self.rect.move(-1*TAILLE_BLOCK[1],0)
                 if event.key == K_UP:
                     print('move UP')
-                    self.removeObject(self.build, self.posX, self.posY)
-                    self.posY -= 1
-                    self.buildObject(self.build, self.posX, self.posY)
+                    self.rect.move(0, -1*TAILLE_BLOCK[1])
                 if event.key == K_DOWN:
                     print('move DOWN')
-                    self.removeObject(self.build, self.posX, self.posY)
-                    self.posY += 1
-                    self.buildObject(self.build, self.posX, self.posY)
+                    self.rect.move(0, 1*TAILLE_BLOCK[1])
 
 
 if __name__ == '__main__':
