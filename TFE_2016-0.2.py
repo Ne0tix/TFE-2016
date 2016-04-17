@@ -4,6 +4,7 @@ import random
 import time
 import pygame
 import sys
+import pygame.constants as c
 from pygame.locals import *
 
 from ConstantesMap import *
@@ -73,12 +74,12 @@ class Map(game):
         game.__init__(self)
         self.buildObject(self.carte)
 
-class Batiment(pygame.sprite.Sprite):
-    images = []
+class Batiment():
     def __init__(self, bat):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = self.images[0]
-        self.rect = self.image.get_rect(midbottom=SCREENRECT.midbottom)
+        self.ball = pygame.image.load("1.png").convert_alpha()
+        self.ballRect = self.ball.get_rect()
+        surface.blit(self.ball, self.ballRect)
+        pygame.display.flip()
         
     
     def buildMove(self):
@@ -86,16 +87,20 @@ class Batiment(pygame.sprite.Sprite):
             if event.type == KEYDOWN:
                 if event.key == K_RIGHT:
                     print('move RIGHT')
-                    self.rect.move(1*TAILLE_BLOCK[1],0)
+                    self.rect.rect.move(1*TAILLE_BLOCK[1],0)
+
                 if event.key == K_LEFT:
                     print('move LEFT')
-                    self.rect.move(-1*TAILLE_BLOCK[1],0)
+                    self.rect.rect.move(-1*TAILLE_BLOCK[1],0)
+
                 if event.key == K_UP:
                     print('move UP')
-                    self.rect.move(0, -1*TAILLE_BLOCK[1])
+                    self.rect.rect.move(0, -1*TAILLE_BLOCK[1])
+
                 if event.key == K_DOWN:
                     print('move DOWN')
-                    self.rect.move(0, 1*TAILLE_BLOCK[1])
+                    self.rect.rect.move(0, 1*TAILLE_BLOCK[1])
+
 
 
 if __name__ == '__main__':

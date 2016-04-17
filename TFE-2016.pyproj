@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{cff02096-1bdd-4849-a315-2c569dddbfaf}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>TFE_2016-0.2.py</StartupFile>
+    <StartupFile>generateMap.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -22,6 +22,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ConstantesMap.py" />
+    <Compile Include="generateMap.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TFE_2016-0.2.py" />
     <Compile Include="TFE_2016.py" />
   </ItemGroup>
