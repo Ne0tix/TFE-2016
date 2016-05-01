@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{cff02096-1bdd-4849-a315-2c569dddbfaf}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>generateMap.py</StartupFile>
+    <StartupFile>TFE_2016-0.2.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -21,6 +21,9 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="TestKivy.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ConstantesMap.py" />
     <Compile Include="generateMap.py">
       <SubType>Code</SubType>

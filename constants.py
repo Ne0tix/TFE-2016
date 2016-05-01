@@ -1,5 +1,9 @@
+import pygame
 TAILLE_FENETRE = (640, 480)
 TAILLE_BLOCK = (10, 10)
+
+GREEN = (0, 255, 0)
+WHITE = (0, 0, 0)
 
 TAILLE_MAP = (int(TAILLE_FENETRE[0]/TAILLE_BLOCK[0]), int(TAILLE_FENETRE[1]/TAILLE_BLOCK[1]))
 
@@ -33,6 +37,16 @@ BUILD = [
     [5,5,5]
 ]
 
+imgArbre = pygame.image.load("6.png")
+imgHerbe = pygame.image.load("herbe.png")
+imgEau = pygame.image.load("eau.png")
+imgPierre = pygame.image.load("pierre.png")
+IMG = {
+    1: (pygame.transform.scale(imgArbre, (10,10))),
+    2: (pygame.transform.scale(imgHerbe, (10,10))),
+    3: (pygame.transform.scale(imgEau, (10,10))),
+    4: (pygame.transform.scale(imgPierre, (10,10)))
+    }
 COLORS = {
     0: (0, 0, 0), # Noir
     1: (255, 255, 0), # Jaune
