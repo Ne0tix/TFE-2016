@@ -75,61 +75,57 @@ class main():
                 if event.type == pygame.QUIT: # On quit game
                     pygame.quit()
                     sys.quit()
-                
-                ### Action de deplacement
-                if self.currentSelected != None:
-                    if self.currentSelected.moveActive:
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            if self.currentSelected != None:
-                                pos = pygame.mouse.get_pos()
-                                self.chemin = self.IA(((self.currentSelected.positionX), (self.currentSelected.positionY)), (int((pos[0])/10),int((pos[1])/10)) )
-                                self.actionToDo[self.currentSelected] = self.chemin
-                                self.currentSelected.moveActive = False
-                                
+                                               
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    print(event)
-                ### Outil de selection ###
-                    selectionneur = sprite()
-                    pos = pygame.mouse.get_pos()
-                    selectionneur.moveSprite(pos)
-                    
-                    ### Colision with any build
-                    selecting = pygame.sprite.spritecollideany(selectionneur, self.current_level.staticSprite)                    
-                    if selecting != None:
-                        for item in self.action.winfo_children(): # Destruction de l intérieur de la frame action
-                            item.destroy()
+                    if pygame.mouse.get_pressed()[2]: # Clic droit
+                        if self.currentSelected != None:
+                            if str(self.currentSelected[1]) == "villageoi":
+                                pos =pygame.mouse.get_pos()
+                                self.chemin = self.IA(((self.currentSelected[0].positionX), (self.currentSelected[0].positionY)), (int((pos[0])/10),int((pos[1])/10)))
+                                self.actionToDo[self.currentSelected[0]] = self.chemin
+                    if pygame.mouse.get_pressed()[0]: # Clic gauche
+                        ### Outil de selection ###
+                        selectionneur = sprite()
+                        pos = pygame.mouse.get_pos()
+                        selectionneur.moveSprite(pos)
+                        
+                        ### Colision with any build
+                        selecting = pygame.sprite.spritecollideany(selectionneur, self.current_level.staticSprite)                    
+                        if selecting != None:
+                            for item in self.action.winfo_children(): # Destruction de l intérieur de la frame action
+                                item.destroy()
+                                
+                            for item in self.select.winfo_children(): # Destruction de l intérieur de la frame select
+                                item.destroy()
                             
-                        for item in self.select.winfo_children(): # Destruction de l intérieur de la frame select
-                            item.destroy()
-                        
-                        selecting.drawAction(self) # Dessin de la nouvelle frame
-                        self.currentSelected = None
-                        
-                    ### Colision with any Entity
-                    selecting = pygame.sprite.spritecollideany(selectionneur, self.current_level.entitySprite)
-                    if selecting != None:
-                        for item in self.action.winfo_children(): # Destruction de l intérieur de la frame action
-                            item.destroy()
+                            selecting.drawAction(self) # Dessin de la nouvelle frame
+                            self.currentSelected = (selecting, selecting.__class__.__name__) # Recupere le nom de la classe instantié
+                                                    
+                        ### Colision with any Entity
+                        selecting = pygame.sprite.spritecollideany(selectionneur, self.current_level.entitySprite)
+                        if selecting != None:
+                            for item in self.action.winfo_children(): # Destruction de l intérieur de la frame action
+                                item.destroy()
+                                
+                            for item in self.select.winfo_children(): # Destruction de l intérieur de la frame select
+                                item.destroy()
                             
-                        for item in self.select.winfo_children(): # Destruction de l intérieur de la frame select
-                            item.destroy()
+                            selecting.drawAction(self) # Dessin de la nouvelle Frame
+                            self.currentSelected = (selecting, selecting.__class__.__name__)
                         
-                        selecting.drawAction(self) # Dessin de la nouvelle Frame
-                        self.currentSelected = selecting
-                    
-                    ### Colision with any ressource
-                    selecting = pygame.sprite.spritecollideany(selectionneur, self.current_level.ressourceSprite)
-                    if selecting != None:
-                        for item in self.action.winfo_children(): # Destruction de l intérieur de la frame action
-                            item.destroy()
+                        ### Colision with any ressource
+                        selecting = pygame.sprite.spritecollideany(selectionneur, self.current_level.ressourceSprite)
+                        if selecting != None:
+                            for item in self.action.winfo_children(): # Destruction de l intérieur de la frame action
+                                item.destroy()
+                                
+                            for item in self.select.winfo_children(): # Destruction de l intérieur de la frame select
+                                item.destroy()
                             
-                        for item in self.select.winfo_children(): # Destruction de l intérieur de la frame select
-                            item.destroy()
-                        
-                        selecting.drawAction(self) # Dessin de la nouvelle Frame
-                        self.currentSelected = None
+                            selecting.drawAction(self) # Dessin de la nouvelle Frame
+                            self.currentSelected = (selecting, selecting.__class__.__name__)
                                                 
-                   
+                ### Event timer ###
                 if event.type == USEREVENT +1: # Toute les 300ms
                     for action in self.actionToDo:
                         self.actionList = self.actionToDo[action]
@@ -152,7 +148,7 @@ class main():
                                         
                                     for item in self.select.winfo_children(): # Destruction de l intérieur de la frame select
                                         item.destroy()
-                                    producer.drawAction(self.game)
+                                    producer.drawAction(self)
                             else:
                                 self.current_level.ressourceSprite.remove(producer)
                             
@@ -184,6 +180,9 @@ class main():
                 colisioned = pygame.sprite.spritecollideany(colisioneur, self.current_level.wallSpriteColide)
                 if colisioned != None:
                     wall.append((x,y))
+                colisioned = pygame.sprite.spritecollideany(colisioneur, self.current_level.staticSprite)
+                if colisioned != None:
+                    wall.append((x, y))
         map = myIA.GridWithWeights(constants.TAILLE_FENETRE[0],constants.TAILLE_FENETRE[1])
         map.walls = wall
         cfrom, sfar = myIA.a_star_search(map, currentPos, goal)
