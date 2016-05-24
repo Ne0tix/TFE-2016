@@ -1,61 +1,14 @@
-import pygame
 TAILLE_FENETRE = (640, 480)
-TAILLE_BLOCK = (10, 10)
 
-GREEN = (0, 255, 0)
-WHITE = (0, 0, 0)
+imgComptoire = "image/1.png"
+imgBackground = "image/Background.png"
+imgChar = "image/char.png"
+imgArbre = "image/Foret.png"
+imgLac = "image/Lac.png"
+imgPierre = "image/pierre.png"
+imgWall480 = "image/wall480.png"
+imgWall640 = "image/wall640.png"
+imgnourriture = "image/nourriture.png"
+imgWoodFarm = "image/woodfarm.png"
 
-TAILLE_MAP = (int(TAILLE_FENETRE[0]/TAILLE_BLOCK[0]), int(TAILLE_FENETRE[1]/TAILLE_BLOCK[1]))
-
-MAP = [
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    ]
-
-
-BUILD = [
-    [5,5,5],
-    [5,5,5],
-    [5,5,5]
-]
-
-imgArbre = pygame.image.load("6.png")
-imgHerbe = pygame.image.load("herbe.png")
-imgEau = pygame.image.load("eau.png")
-imgPierre = pygame.image.load("pierre.png")
-IMG = {
-    1: (pygame.transform.scale(imgArbre, (10,10))),
-    2: (pygame.transform.scale(imgHerbe, (10,10))),
-    3: (pygame.transform.scale(imgEau, (10,10))),
-    4: (pygame.transform.scale(imgPierre, (10,10)))
-    }
-COLORS = {
-    0: (0, 0, 0), # Noir
-    1: (255, 255, 0), # Jaune
-    2: (0, 255, 0), # Vert
-    3: (255, 0, 0), # Rouge
-    4: (0, 255, 255), # Cyan
-    5: (0, 0, 255), # Bleu
-    6: (255, 127, 0), # Orange
-    7: (255, 0, 255), # Rose
-    8: (127, 255, 0), # Vert Clair
-    9: (255, 255, 255), # Blanc
-}
+LtRessource = ["bois", "pierre", "nourriture"]
