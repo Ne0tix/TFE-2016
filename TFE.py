@@ -81,7 +81,7 @@ class main():
                         if self.currentSelected != None:
                             if str(self.currentSelected[1]) == "villageoi":
                                 pos =pygame.mouse.get_pos()
-                                self.chemin = self.IA(((self.currentSelected[0].positionX), (self.currentSelected[0].positionY)), (int((pos[0])/10),int((pos[1])/10)))
+                                self.chemin = self.IA(((self.currentSelected[0].positionX), (self.currentSelected[0].positionY)), (int(((pos[0])/10)),int(((pos[1])/10))))
                                 self.actionToDo[self.currentSelected[0]] = self.chemin
                     if pygame.mouse.get_pressed()[0]: # Clic gauche
                         ### Outil de selection ###
@@ -282,27 +282,41 @@ class entity(pygame.sprite.Sprite):
         self.positionY = (pos[1])
         self.rect.x = self.positionX*10
         self.rect.y = self.positionY*10
-
-class comptoire(entity):
-    def __init__(self, level, position):
+        
+### Class de toute les batiment et leur fonctionnement
+class batiment(entity):
+    def __init__(self,level, position):
         entity.__init__(self, level, position)
-        self.vie = 30
-        self.vieMax = 30
-        self.invent = 0
-        self.inventMax = 30
+        self.needProduct = {}
+        self.makeProduct = {}
+        self.travailleur = {}
+    
+class comptoire(batiment):
+    def __init__(self, level, position):
+        batiment.__init__(self, level, position)
         self.loadImg(constants.imgComptoire, position)
         
     def drawAction(self, fen):
         Label.test = Label(fen.action, text="Test")
         Label.test.grid()
 
-class woodFarm(entity):
+class woodFarm(batiment):
     def __init__(self, level, position):
-        entity.__init__(self, level, position)
-        self.vie = 30
-        self.vieMax = 30
+        batiment.__init__(self, level, position)
+        self.makeProduct = {"Bois" : 3}
         self.loadImg(constants.imgWoodFarm, position)
 
+class wheatFarm(batiment):
+    def __init__(self, level, position):
+        batiment.__init__(self, level, position)
+        self.makeProduct = {"ble" : 3}
+
+class carrier(batiment):
+    def __init__(self, level, position):
+        batiment.__init__(self, level, position)
+        self.makeProduct = {"pierre" : 3}
+
+### class de tout les ressources et leur fonctionnement
 class ressource(entity):
     def __init__(self, level, position):
         entity.__init__(self, level, position)
