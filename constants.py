@@ -10,5 +10,6 @@ imgWall480 = "image/wall480.png"
 imgWall640 = "image/wall640.png"
 imgnourriture = "image/nourriture.png"
 imgWoodFarm = "image/woodfarm.png"
-
-LtRessource = ["bois", "pierre", "nourriture"]
+imgWheatFarm = "image/ForetRessource.png"
+imgCobleFarm = "image/pierreRessource.png"
+imgHome = "image/home.png"
