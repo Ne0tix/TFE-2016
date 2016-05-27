@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter.messagebox import *
 import sqlite3
 import os.path
+import TFE
 
 dirBase = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(dirBase, "DataBase/UserData.db3")
@@ -243,7 +244,8 @@ class gameMenu(dropDown):
         self.gameMenuBackButton.grid()
         
     def newGame(self):
-        pass
+        self.screen.destroy()
+        self.TFE.main(userConnection.connectionName)
     
     def loadGame(self):
         pass

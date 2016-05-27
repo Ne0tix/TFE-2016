@@ -5,10 +5,15 @@ import constants
 import os
 import myIA
 import random
+import datetime
+import sqlite3
+
 
 class main():    
 
-    def __init__(self):
+    def __init__(self, user):
+        
+        self.user = user
         #### Village Var ####
         
         self.game = Tk()
@@ -41,6 +46,7 @@ class main():
         self.second = 0
         pygame.time.set_timer(USEREVENT + 1, 300) # Timer déplacement
         pygame.time.set_timer(USEREVENT + 2, 500) # Timer Action
+        pygame.time.set_timer(USEREVENT + 3, 1500)
         self.actionToDo = {}
         self.currentSelected = None
 
@@ -78,7 +84,7 @@ class main():
                     sys.quit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == K_ESCAPE:
-                        self.MenuSave = Tk()
+                        self.makeSave()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if pygame.mouse.get_pressed()[2]: # Clic droit
                         if self.currentSelected != None:
@@ -154,6 +160,8 @@ class main():
                                     producer.drawAction(self)
                             else:
                                 self.current_level.ressourceSprite.remove(producer)
+                    
+                if event.type == USEREVENT  + 3: #Toute les secondes
                     for build in self.current_level.staticSprite:
                         for make in build.makeProduct:
                             self.current_level.ressource[make] += build.makeProduct[make]
@@ -206,7 +214,37 @@ class main():
         cfrom, sfar = myIA.a_star_search(map, currentPos, goal)
         path = myIA.reconstruct_path(cfrom, currentPos, goal)
         return path
+    
+    def makeSave(self):
+        self.save = Tk()
         
+        self.saveButton = Button(self.save, text="Save", command= lambda: self.mSave())
+        self.saveButton.grid()
+        
+        self.save.mainloop()
+    def mSave(self):
+        self.saveName = self.user + "-" + str(datetime.datetime.strftime(datetime.datetime.now(), "%d-%m-%y-%H-%M-%S")) 
+        print(self.saveName) 
+        conn = sqlite3.connect("DataBase/"+self.saveName+".db3")
+        c = conn.cursor()
+        cLevel = self.current_level.__class__.__name__
+        ### Creation de la table
+        c.execute("CREATE TABLE Level(ID integer not null unique primary key asc autoincrement,CurrentLevel TEXT);")
+        c.execute("CREATE TABLE StaticSprite(ID integer not null unique primary key asc autoincrement,ClassName TEXT,Position TEXT,IDLevel REFERENCES Level);")
+        c.execute("CREATE TABLE EntitySprite(ID integer not null unique primary key asc autoincrement,ClassName TEXT,Position TEXT,IDLevel REFERENCES Level);")
+        c.execute("CREATE TABLE RessourceSprite(ID integer not null unique primary key asc autoincrement,ClassName TEXT,Position TEXT,IDLevel REFERENCES Level);")
+        
+        c.execute("INSERT INTO Level (CurrentLevel) VALUES (?);", (str(cLevel),))
+        ### Entree des donnée
+        for objet in self.current_level.staticSprite:
+            className = objet.__class__.__name__
+            print(className)
+            position = str((objet.positionX, objet.positionY))
+            print(position)
+            c.execute("INSERT INTO StaticSprite (ClassName, Position, IDLevel) VALUES (?, ?, (SELECT ID FROM Level where CurrentLevel = (?)));", (className, position, str(cLevel)))
+        conn.commit()
+        c.close
+                
 class Level(object):
     def __init__(self):
         self.wallSpriteColide = pygame.sprite.Group()
@@ -315,7 +353,7 @@ class home(batiment):
     def __init__(self, level, position):
         batiment.__init__(self, level, position)
         self.cost = {"Bois": 50, "Pierre": 30}
-        self.needProduct = {"Bois": 3}
+        self.needProduct = {"Bois": 1}
         self.loadImg(constants.imgHome, position)
             
     def drawAction(self, fen):
@@ -513,5 +551,5 @@ class villageoi(entity):
             self.currentLevel.movingSprite.add(x)
             
 if __name__ == "__main__":
-    z = main()
+    z = main("moi")
     
