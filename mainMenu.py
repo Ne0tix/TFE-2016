@@ -68,7 +68,11 @@ class dropDown(object):
         self.userConnection = userConnection(self.screen)
         self.backButton = Button(self.screen, text="Back", command= lambda: self.goToMainMenu())
         self.backButton.grid()
-            
+    
+    def goToLoadSave(self, userName):
+        self.childFrameDestroy()
+        self.loadSave = loadSave(self.screen, userName)
+        
     def goToEcole(self):
         pass
     
@@ -237,7 +241,7 @@ class gameMenu(dropDown):
         self.newGameButton = Button(self.gameMenuFrame, text="New Game", command= lambda: self.newGame())
         self.newGameButton.grid()
         
-        self.loadGameButton = Button(self.gameMenuFrame, text="Load Game", command= lambda: self.loadGame())
+        self.loadGameButton = Button(self.gameMenuFrame, text="Load Game", command= lambda: self.goToLoadSave(self.userName))
         self.loadGameButton.grid()
         
         self.gameMenuBackButton = Button(self.gameMenuFrame, text="Back", command= lambda: self.goToUserMenu())
@@ -245,10 +249,39 @@ class gameMenu(dropDown):
         
     def newGame(self):
         self.screen.destroy()
-        self.TFE.main(userConnection.connectionName)
-    
-    def loadGame(self):
-        pass
+        TFE.main(self.userName, False)
+
+class loadSave(dropDown):
+    def __init__(self, screen, userName):
+        dropDown.__init__(self, screen)
+        
+        self.userName = userName
+        
+        self.loadSaveFrame = LabelFrame(screen, text="Load Save")
+        self.loadSaveFrame.grid()
+        
+        self.saveListBox = Listbox(self.loadSaveFrame)
+        
+        conn = sqlite3.connect("DataBase/UserData.db3")
+        c = conn.cursor()
+        
+        c.execute("SELECT Save from UserSave where UserID = (select ID from User where Name = (?))", ( self.userName,))
+        for raw in c:
+            self.saveListBox.insert(END, raw)
+        conn.commit()
+        c.close()
+        
+        self.saveListBox.grid()
+        
+        self.loadButton = Button(self.loadSaveFrame, text="Load", command= lambda: self.loadSaveGame(self.saveListBox.get(ACTIVE)))
+        self.loadButton.grid()
+        
+        self.backButton = Button(self.loadSaveFrame, text="Back", command= lambda: self.goToGameMenu())
+        self.backButton.grid()
+        
+    def loadSaveGame(self, save):
+        self.screen.destroy()
+        TFE.main(self.userName, True, save)
         
 if __name__ == "__main__":
     master = Tk()

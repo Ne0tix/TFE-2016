@@ -7,13 +7,15 @@ import myIA
 import random
 import datetime
 import sqlite3
+import mainMenu
 
 
 class main():    
 
-    def __init__(self, user):
+    def __init__(self, user, load=False, save=None):
         
         self.user = user
+        self.saveName = save
         #### Village Var ####
         
         self.game = Tk()
@@ -31,6 +33,13 @@ class main():
         self.action = LabelFrame(self.game, text="Action", width=100, height=480)
         self.action.grid(row=0, column=0)
         
+        # Autre
+        self.saveButton = Button(self.game, text="Save", command= lambda: self.mSave())
+        self.saveButton.grid()
+        
+        self.backToMainmenu = Button(self.game, text="Back to menu", command= lambda: self.backToMainMenu())
+        self.backToMainmenu.grid()
+        
         # Frame Game
         self.embed = Frame(self.game, width=640, height=480)
         self.embed.grid(row=0, column=1)
@@ -40,7 +49,41 @@ class main():
         pygame.display.init()
         self.screen = pygame.display.set_mode(constants.TAILLE_FENETRE)
         
-        self.current_level = Level01(self.screen)
+        if load:
+            conn = sqlite3.connect("DataBase/"+self.saveName[0]+".db3")
+            c = conn.cursor()
+            
+            c.execute("SELECT CurrentLevel from Level")
+            for row in c:
+                self.current_level = eval(row[0]+"(self.screen)")
+                for objet in self.current_level.ressourceSprite:
+                    self.current_level.ressourceSprite.remove(objet)
+                
+                for objet in self.current_level.staticSprite:
+                    self.current_level.staticSprite.remove(objet)
+                
+                for objet in self.current_level.entitySprite:
+                    self.current_level.entitySprite.remove(objet)
+            
+            c.execute("SELECT ClassName, Position from RessourceSprite")
+            for row in  c:
+                x = eval(row[0]+"(self.current_level, eval(row[1]))")
+                self.current_level.ressourceSprite.add(x)
+            
+            c.execute("SELECT className, Position from StaticSprite")
+            for row in c:
+                x = eval(row[0]+"(self.current_level, eval(row[1]))")
+                self.current_level.staticSprite.add(x)
+            
+            c.execute("SELECT className, position from entitySprite")
+            for row in c:
+                x = eval(row[0]+"(self.current_level, eval(row[1]))")
+                self.current_level.entitySprite.add(x)
+            
+            conn.commit()
+            c.close()
+        else:
+            self.current_level = Level01(self.screen)
                 
         self.clock = pygame.time.Clock()
         self.second = 0
@@ -82,9 +125,6 @@ class main():
                     pygame.quit()
                     self.game.quit()
                     sys.quit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        self.makeSave()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if pygame.mouse.get_pressed()[2]: # Clic droit
                         if self.currentSelected != None:
@@ -215,16 +255,8 @@ class main():
         path = myIA.reconstruct_path(cfrom, currentPos, goal)
         return path
     
-    def makeSave(self):
-        self.save = Tk()
-        
-        self.saveButton = Button(self.save, text="Save", command= lambda: self.mSave())
-        self.saveButton.grid()
-        
-        self.save.mainloop()
     def mSave(self):
         self.saveName = self.user + "-" + str(datetime.datetime.strftime(datetime.datetime.now(), "%d-%m-%y-%H-%M-%S")) 
-        print(self.saveName) 
         conn = sqlite3.connect("DataBase/"+self.saveName+".db3")
         c = conn.cursor()
         cLevel = self.current_level.__class__.__name__
@@ -233,18 +265,43 @@ class main():
         c.execute("CREATE TABLE StaticSprite(ID integer not null unique primary key asc autoincrement,ClassName TEXT,Position TEXT,IDLevel REFERENCES Level);")
         c.execute("CREATE TABLE EntitySprite(ID integer not null unique primary key asc autoincrement,ClassName TEXT,Position TEXT,IDLevel REFERENCES Level);")
         c.execute("CREATE TABLE RessourceSprite(ID integer not null unique primary key asc autoincrement,ClassName TEXT,Position TEXT,IDLevel REFERENCES Level);")
+        c.execute("CREATE TABLE Ressource(ID integer not null unique primary key asc autoincrement, RessourceName TEXT, NbRessource integer, IDLevel REFERENCES Level);")
         
         c.execute("INSERT INTO Level (CurrentLevel) VALUES (?);", (str(cLevel),))
         ### Entree des donnée
         for objet in self.current_level.staticSprite:
             className = objet.__class__.__name__
-            print(className)
             position = str((objet.positionX, objet.positionY))
-            print(position)
             c.execute("INSERT INTO StaticSprite (ClassName, Position, IDLevel) VALUES (?, ?, (SELECT ID FROM Level where CurrentLevel = (?)));", (className, position, str(cLevel)))
+        
+        for objet in self.current_level.entitySprite:
+            className = objet.__class__.__name__
+            position = str((objet.positionX, objet.positionY))
+            c.execute("INSERT INTO EntitySprite (className, Position, IDLevel) VALUES (?, ?, (select ID from Level where CurrentLevel = (?)));", (className, position, str(cLevel)))
+
+        for objet in self.current_level.ressourceSprite:
+            className = objet.__class__.__name__
+            position = str((objet.positionX, objet.positionY))
+            c.execute("INSERT INTO RessourceSprite (className, Position, IDLevel) VALUES (?, ?, (select ID from Level where CurrentLevel = (?)));", (className, position, str(cLevel)))
+        
+        for ressource in self.current_level.ressource:
+            c.execute("INSERT INTO Ressource (RessourceName, NbRessource, IDLevel) VALUES (?, ?, (select ID from Level where CurrentLevel = (?)));", (ressource, self.current_level.ressource[ressource], str(cLevel)))
         conn.commit()
-        c.close
-                
+        c.close()
+        
+        conn = sqlite3.connect("DataBase/UserData.db3")
+        c = conn.cursor()
+        
+        c.execute("INSERT INTO UserSave (Save, UserID) Values (?, (select ID from User where Name = (?)));", (self.saveName, self.user))
+        
+        conn.commit()
+        c.close()
+    
+    def backToMainMenu(self):
+        self.game.destroy()
+        master = Tk()
+        menu = mainMenu.mainMenu(master)
+        master.mainloop()
 class Level(object):
     def __init__(self):
         self.wallSpriteColide = pygame.sprite.Group()
@@ -548,8 +605,4 @@ class villageoi(entity):
             if self.currentLevel.ressource[price] - x.cost[price] < 0:
                 validator = False
         if validator:
-            self.currentLevel.movingSprite.add(x)
-            
-if __name__ == "__main__":
-    z = main("moi")
-    
+            self.currentLevel.movingSprite.add(x)    
