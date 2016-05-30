@@ -13,7 +13,7 @@ class dropDown(object):
         menu = Menu(self.screen)
         
         # Sous Menu Fichier
-        fileMenu = Menu(menu, tearoff=0)
+        fileMenu = Menu(MMmenu, tearoff=0)
         fileMenu.add_command(label="Main Menu", command= lambda: self.goToMainMenu())
         fileMenu.add_command(label="User Menu", command= lambda: self.goToUserMenu())
         fileMenu.add_separator()
