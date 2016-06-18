@@ -605,4 +605,4 @@ class villageoi(entity):
             if self.currentLevel.ressource[price] - x.cost[price] < 0:
                 validator = False
         if validator:
-            self.currentLevel.movingSprite.add(x)    
+            self.currentLevel.movingSprite.add(x)
