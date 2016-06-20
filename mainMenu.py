@@ -13,7 +13,7 @@ class dropDown(object):
         menu = Menu(self.screen)
         
         # Sous Menu Fichier
-        fileMenu = Menu(MMmenu, tearoff=0)
+        fileMenu = Menu(menu, tearoff=0)
         fileMenu.add_command(label="Main Menu", command= lambda: self.goToMainMenu())
         fileMenu.add_command(label="User Menu", command= lambda: self.goToUserMenu())
         fileMenu.add_separator()
@@ -152,7 +152,7 @@ class addUser(dropDown):
         else:
             conn = sqlite3.connect(db_path)
             c = conn.cursor()
-            c.execute("SELECT User from User where Name = ?", (self.userName,))
+            c.execute("SELECT Name from User where Name = ?", (self.userName,))
             self.user = c.fetchone()
             if self.user != None:
                 showerror("Add User Error", "User name exist")
@@ -276,12 +276,12 @@ class loadSave(dropDown):
         self.loadButton = Button(self.loadSaveFrame, text="Load", command= lambda: self.loadSaveGame(self.saveListBox.get(ACTIVE)))
         self.loadButton.grid()
         
-        self.backButton = Button(self.loadSaveFrame, text="Back", command= lambda: self.goToGameMenu())
+        self.backButton = Button(self.loadSaveFrame, text="Back", command= lambda: self.goToGameMenu(self.userName))
         self.backButton.grid()
         
     def loadSaveGame(self, save):
-        self.screen.destroy()
-        TFE.main(self.userName, True, save)
+            self.screen.destroy()
+            TFE.main(self.userName, True, save)
         
 if __name__ == "__main__":
     master = Tk()

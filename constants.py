@@ -2,7 +2,7 @@ TAILLE_FENETRE = (640, 480)
 
 imgComptoire = "image/1.png"
 imgBackground = "image/Background.png"
-imgChar = "image/char.png"
+imgChar = "image/Character.png"
 imgArbre = "image/Foret.png"
 imgLac = "image/Lac.png"
 imgPierre = "image/pierre.png"

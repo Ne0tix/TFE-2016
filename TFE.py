@@ -67,17 +67,17 @@ class main():
             
             c.execute("SELECT ClassName, Position from RessourceSprite")
             for row in  c:
-                x = eval(row[0]+"(self.current_level, eval(row[1]))")
+                x = ressource(self.current_level, eval(row[1]), row[0])
                 self.current_level.ressourceSprite.add(x)
             
             c.execute("SELECT className, Position from StaticSprite")
             for row in c:
-                x = eval(row[0]+"(self.current_level, eval(row[1]))")
+                x = build(self.current_level, eval(row[1]), row[0])
                 self.current_level.staticSprite.add(x)
             
             c.execute("SELECT className, position from entitySprite")
             for row in c:
-                x = eval(row[0]+"(self.current_level, eval(row[1]))")
+                x = villageoi(self.current_level, eval(row[1]))
                 self.current_level.entitySprite.add(x)
             
             conn.commit()
@@ -129,9 +129,20 @@ class main():
                     if pygame.mouse.get_pressed()[2]: # Clic droit
                         if self.currentSelected != None:
                             if str(self.currentSelected[1]) == "villageoi":
-                                pos =pygame.mouse.get_pos()
-                                self.chemin = self.IA(((self.currentSelected[0].positionX), (self.currentSelected[0].positionY)), (int(((pos[0])/10)),int(((pos[1])/10))))
-                                self.actionToDo[self.currentSelected[0]] = self.chemin
+                                selectionneur = sprite()
+                                pos = pygame.mouse.get_pos()
+                                selectionneur.moveSprite(pos)
+
+                                wrongWall = pygame.sprite.spritecollideany(selectionneur, self.current_level.wallSpriteColide)
+                                wrongBuild = pygame.sprite.spritecollideany(selectionneur, self.current_level.staticSprite)
+                                wrongEntity = pygame.sprite.spritecollideany(selectionneur, self.current_level.entitySprite)
+                                wrongRessource = pygame.sprite.spritecollideany(selectionneur, self.current_level.ressourceSprite)
+                                if wrongWall != None or wrongBuild != None or wrongEntity != None or wrongRessource != None:
+                                    pass
+                                else:
+                                    self.chemin = self.IA(((self.currentSelected[0].positionX), (self.currentSelected[0].positionY)), (int(((pos[0])/10)),int(((pos[1])/10))))
+                                    self.actionToDo[self.currentSelected[0]] = self.chemin
+
                     if pygame.mouse.get_pressed()[0]: # Clic gauche
                         ### Outil de selection ###
                         selectionneur = sprite()
@@ -188,7 +199,7 @@ class main():
                     for entity in self.current_level.entitySprite:
                         producer = pygame.sprite.spritecollideany(entity, self.current_level.ressourceSprite)
                         if producer != None:
-                            self.current_level.ressource[producer.product] += 1
+                            self.current_level.ressource[producer.name] += 1
                             if producer.currentRessource != 0:
                                 producer.currentRessource -= 1
                                 if self.currentSelected == None:
@@ -202,11 +213,11 @@ class main():
                                 self.current_level.ressourceSprite.remove(producer)
                     
                 if event.type == USEREVENT  + 3: #Toute les secondes
-                    for build in self.current_level.staticSprite:
-                        for make in build.makeProduct:
-                            self.current_level.ressource[make] += build.makeProduct[make]
-                        for need in build.needProduct:
-                            self.current_level.ressource[need] -= build.needProduct[need]
+                    for static in self.current_level.staticSprite:
+                        for make in static.makeProduct:
+                            self.current_level.ressource[make] += static.makeProduct[make]
+                        for need in static.needProduct:
+                            self.current_level.ressource[need] -= static.needProduct[need]
                             
   
                             
@@ -214,7 +225,7 @@ class main():
                         
                 for objet in self.current_level.movingSprite:
                     pos = pygame.mouse.get_pos()
-                    objet.move((int(pos[0]/10), int(pos[1])/10))
+                    objet.move((int(pos[0]/10), int(pos[1]/10)))
                     wrongWall = pygame.sprite.spritecollideany(objet, self.current_level.wallSpriteColide)
                     wrongBuild = pygame.sprite.spritecollideany(objet, self.current_level.staticSprite)
                     wrongEntity = pygame.sprite.spritecollideany(objet, self.current_level.entitySprite)
@@ -270,7 +281,7 @@ class main():
         c.execute("INSERT INTO Level (CurrentLevel) VALUES (?);", (str(cLevel),))
         ### Entree des donnée
         for objet in self.current_level.staticSprite:
-            className = objet.__class__.__name__
+            className = objet.type
             position = str((objet.positionX, objet.positionY))
             c.execute("INSERT INTO StaticSprite (ClassName, Position, IDLevel) VALUES (?, ?, (SELECT ID FROM Level where CurrentLevel = (?)));", (className, position, str(cLevel)))
         
@@ -280,7 +291,7 @@ class main():
             c.execute("INSERT INTO EntitySprite (className, Position, IDLevel) VALUES (?, ?, (select ID from Level where CurrentLevel = (?)));", (className, position, str(cLevel)))
 
         for objet in self.current_level.ressourceSprite:
-            className = objet.__class__.__name__
+            className = objet.name
             position = str((objet.positionX, objet.positionY))
             c.execute("INSERT INTO RessourceSprite (className, Position, IDLevel) VALUES (?, ?, (select ID from Level where CurrentLevel = (?)));", (className, position, str(cLevel)))
         
@@ -299,9 +310,8 @@ class main():
     
     def backToMainMenu(self):
         self.game.destroy()
-        master = Tk()
-        menu = mainMenu.mainMenu(master)
-        master.mainloop()
+        os.system('mainMenu.py')
+
 class Level(object):
     def __init__(self):
         self.wallSpriteColide = pygame.sprite.Group()
@@ -352,28 +362,28 @@ class Level01(Level):
             self.wallSpriteColide.add(block)
         
         levelRessource = [
-            [bois, (12, 12)],
-            [bois, (13, 14)],
-            [bois, (16, 15)],
-            [bois, (25, 19)],
-            [pierre, (20, 30)],
-            [pierre, (23, 28)],
-            [pierre, (17, 33)],
-            [nourriture, (30, 45)],
-            [nourriture, (33, 42)]
+            [ (12, 12),"Wood"],
+            [ (13, 14),"Wood"],
+            [ (16, 15),"Wood"],
+            [ (25, 19),"Wood"],
+            [ (20, 30),"Stone"],
+            [ (23, 28),"Stone"],
+            [ (17, 33),"Stone"],
+            [ (30, 45),"Food"],
+            [ (33, 42),"Food"]
         ]
         
-        for ressource in levelRessource:
-            x = ressource[0](self, ressource[1])
+        for provides in levelRessource:
+            x = ressource(self, provides[0], provides[1])
             self.ressourceSprite.add(x)
                     
-        self.home1 = home(self, (5,5))
-        self.staticSprite.add(self.home1)
-        self.villageoi1 = villageoi(self, (6,6))
-        self.entitySprite.add(self.villageoi1)
+        #self.home1 = home(self, (5,5))
+        #self.staticSprite.add(self.home1)
+        #self.villageoi1 = villageoi(self, (6,6))
+        #self.entitySprite.add(self.villageoi1)
         
-        self.home2 = home(self, (8, 6))
-        self.staticSprite.add(self.home2)
+        #self.home2 = home(self, (8, 6))
+        #self.staticSprite.add(self.home2)
         self.villageoi2 = villageoi(self, (9, 7))
         self.entitySprite.add(self.villageoi2)
 
@@ -398,120 +408,85 @@ class entity(pygame.sprite.Sprite):
         self.rect.y = self.positionY*10
         
 ### Class de touts les batiment et leur fonctionnement
-class batiment(entity):
-    def __init__(self,level, position):
+class build(entity):
+    def __init__(self,level, position, type, cost={}, need={}, make={}):
         entity.__init__(self, level, position)
-        self.cost = {}
-        self.needProduct = {}
-        self.makeProduct = {}
-        self.travailleur = {}
-        self.coef = 1
-class home(batiment):
-    def __init__(self, level, position):
-        batiment.__init__(self, level, position)
-        self.cost = {"Bois": 50, "Pierre": 30}
-        self.needProduct = {"Bois": 1}
-        self.loadImg(constants.imgHome, position)
-            
+        self.type = type
+        self.cost = cost
+        self.needProduct = need
+        self.makeProduct = make
+        self.loadImg("image/"+self.type+".png", position)
+
     def drawAction(self, fen):
-        pass
-
-class comptoire(batiment):
-    def __init__(self, level, position):
-        batiment.__init__(self, level, position)
-        self.cost = {"nourriture" : 100, "Bois": 100, "Pierre":100}
-        self.needProduct = {"Pierre" : 5}
-        self.loadImg(constants.imgComptoire, position)
-        
-    def drawAction(self, fen):
-        Label.test = Label(fen.action, text="Hotel de ville")
-        Label.test.grid(row=0)
-
-class woodFarm(batiment):
-    def __init__(self, level, position):
-        batiment.__init__(self, level, position)
-        self.cost = {"Bois" : 150, "Pierre": 80}
-        self.makeProduct = {"Bois" : 3}
-        self.loadImg(constants.imgWoodFarm, position)
-
-class wheatFarm(batiment):
-    def __init__(self, level, position):
-        batiment.__init__(self, level, position)
-        self.cost = {"nourriture": 150, "Bois" : 80}
-        self.makeProduct = {"nourriture" : 3}
-        self.loadImg(constants.imgWheatFarm, position)
-
-class carrier(batiment):
-    def __init__(self, level, position):
-        batiment.__init__(self, level, position)
-        self.cost = {"Pierre": 150, "Bois": 80}
-        self.makeProduct = {"pierre" : 3}
-        self.loadImg(constants.imgCobleFarm, position)
+        self.buildNameLabel = Label(fen.select, text=self.type)
+        self.buildNameLabel.grid()
 
 ### class de touts les ressources et leur fonctionnement
 class ressource(entity):
-    def __init__(self, level, position):
+    def __init__(self, level, position, name):
         entity.__init__(self, level, position)
         self.currentRessource = 300
         self.ressource = 300
-        
-class pierre(ressource):
-    def __init__(self, level, position):
-        ressource.__init__(self, level, position)
-        self.loadImg(constants.imgPierre, position)
-        self.product = "Pierre"
-        level.ressource[self.product] = 100
-        
+        self.name = name
+        self.loadImg("image/"+self.name+".png", position)
+        level.ressource[self.name] = 100
+    
+    def drawAction(self, fen):
+        self.nameRessouceLabel = Label(fen.select, text=self.name)
+        self.nameRessouceLabel.grid()
 
-    def drawAction(self, fen):                
-        self.nameRessouceLabel = Label(fen.select, text="Pierre")
-        self.nameRessouceLabel.grid(row=0, column=0)
-        
         self.ressourceLabel = Label(fen.select, text="Ressource :")
         self.ressourceLabel.grid(row=1, column=0)
-        
+
         self.currentRessourceLabel = Label(fen.select, text=self.currentRessource)
         self.currentRessourceLabel.grid(row=1, column=1)
-
-class bois(ressource):
+        
+class villageoi(entity):
     def __init__(self, level, position):
-        ressource.__init__(self, level, position)
-        self.loadImg(constants.imgArbre, position)
-        self.product = "Bois"
-        level.ressource[self.product] = 100
+        entity.__init__(self, level, position)
+        self.vie = 30
+        self.vieMax = 30
+        self.loadImg("image/Character.png", position)
+        self.moveActive = False
         
+    def drawAction(self, fen):
+        # Frame Action 
+        comptoireButton = Button(fen.action, text="Town Center (Wood: 250, Stone: 100)", command= lambda: self.building("TownCenter", {"Wood": 250, "Stone": 100}))
+        comptoireButton.grid(row=0)
+               
+        woodFarmButton = Button(fen.action, text="House (Wood: 30)", command= lambda: self.building("House", {"Wood": 30}))
+        woodFarmButton.grid(row=1)
+        
+        wheatFarmButton = Button(fen.action, text="Lumber Camp (Wood: 100)", command= lambda: self.building("LumberCamp", {"Wood": 100},{}, {"Wood":1}))
+        wheatFarmButton.grid(row=2)
+        
+        cobleFarmButton = Button(fen.action, text="Mining Camp (Wood: 100)", command= lambda: self.building("MiningCamp", {"Wood": 100}, {}, {"Stone":1}))
+        cobleFarmButton.grid(row=3)
+        
+        homeButton = Button(fen.action, text="Farm (Wood: 60)", command= lambda: self.building("Farm", {"Wood": 60},{}, {"Food":1}))
+        homeButton.grid(row=4)
+        
+        # Frame Select        
+        VieLabel = Label(fen.select, text=self.vie)
+        VieMaxLabel = Label(fen.select, text=self.vieMax)
+        VieLabel.grid(row=0, column=0)
+        VieMaxLabel.grid(row=0, column=1)
+        
+    def moveEntity(self):
+        self.moveActive = True
+    
+    def building(self, type, cost={}, need={}, make={}):
+        x = build(self.currentLevel, (10,10), type, cost, need, make)
 
-    def drawAction(self, fen):        
-        self.nameRessouceLabel = Label(fen.select, text="Bois")
-        self.nameRessouceLabel.grid(row=0, column=0)
-        
-        self.ressourceLabel = Label(fen.select, text="Ressource :")
-        self.ressourceLabel.grid(row=1, column=0)
-        
-        self.currentRessourceLabel = Label(fen.select, text=self.currentRessource)
-        self.currentRessourceLabel.grid(row=1, column=1)
+        validator = True
+        for price in x.cost:
+            if self.currentLevel.ressource[price] - x.cost[price] < 0:
+                validator = False
+        if validator:
+            for price in x.cost:
+                self.currentLevel.ressource[price] -= x.cost[price]
+            self.currentLevel.movingSprite.add(x)
 
-class nourriture(ressource):
-    def __init__(self, level, position):
-        ressource.__init__(self, level, position)
-        self.loadImg(constants.imgnourriture, position)
-        self.product = "nourriture"
-        level.ressource[self.product] = 100
-        
-
-    def drawAction(self, fen):        
-        self.nameRessouceLabel = Label(fen.select, text="nourriture")
-        self.nameRessouceLabel.grid(row=0, column=0)
-        
-        self.ressourceLabel = Label(fen.select, text="Ressource :")
-        self.ressourceLabel.grid(row=1, column=0)
-        
-        self.currentRessourceLabel = Label(fen.select, text=self.currentRessource)
-        self.currentRessourceLabel.grid(row=1, column=1)
-
-        
-        
-        
 class sprite(pygame.sprite.Sprite):
 
     def __init__(self, imageData=None):
@@ -529,80 +504,5 @@ class sprite(pygame.sprite.Sprite):
         self.rect.x = position[0]
         self.rect.y = position[1]
                 
-class villageoi(entity):
-    def __init__(self, level, position):
-        entity.__init__(self, level, position)
-        self.vie = 30
-        self.vieMax = 30
-        self.loadImg(constants.imgChar, position)
-        self.moveActive = False
-        
-    def drawAction(self, fen):
-        # Frame Action 
-        comptoireButton = Button(fen.action, text="Hotel de ville (Nouriture: 100, Bois: 100, Pierre: 100)", command= lambda: self.buildComptoire())
-        comptoireButton.grid(row=0)
-               
-        woodFarmButton = Button(fen.action, text="Pépinière (Bois: 150, Pierre: 80)", command= lambda: self.buildWoodFarm())
-        woodFarmButton.grid(row=1)
-        
-        wheatFarmButton = Button(fen.action, text="Ferme (Nouriture: 150, Bois: 80)", command= lambda: self.buildWheatFarm())
-        wheatFarmButton.grid(row=2)
-        
-        cobleFarmButton = Button(fen.action, text="Carrière de Pierre (Pierre: 150, Bois: 80)", command= lambda: self.buildCobleFarm())
-        cobleFarmButton.grid(row=3)
-        
-        homeButton = Button(fen.action, text="Maison (Bois: 50, Pierre: 30)", command= lambda: self.buildHome())
-        homeButton.grid(row=4)
-        
-        # Frame Select        
-        VieLabel = Label(fen.select, text=self.vie)
-        VieMaxLabel = Label(fen.select, text=self.vieMax)
-        VieLabel.grid(row=0, column=0)
-        VieMaxLabel.grid(row=0, column=1)
-        
-    def moveEntity(self):
-        self.moveActive = True
-    
-    def buildComptoire(self):
-        x =comptoire(self.currentLevel, (10,10))
-        validator = True
-        for price in x.cost:
-            if self.currentLevel.ressource[price] - x.cost[price] < 0:
-                validator = False
-        if validator:
-            self.currentLevel.movingSprite.add(x)
-            
-    def buildHome(self):
-        x = home(self.currentLevel, (10,10))
-        validator = True
-        for price in x.cost:
-            if self.currentLevel.ressource[price] - x.cost[price] < 0:
-                validator = False
-        if validator:
-            self.currentLevel.movingSprite.add(x)
-    def buildWoodFarm(self):
-        x = woodFarm(self.currentLevel, (10,10))
-        validator = True
-        for price in x.cost:
-            if self.currentLevel.ressource[price] - x.cost[price] < 0:
-                validator = False
-        if validator:
-            self.currentLevel.movingSprite.add(x)
-
-    def buildWheatFarm(self):
-        x = wheatFarm(self.currentLevel, (10,10))
-        validator = True
-        for price in x.cost:
-            if self.currentLevel.ressource[price] - x.cost[price] < 0:
-                validator = False
-        if validator:
-            self.currentLevel.movingSprite.add(x)
-
-    def buildCobleFarm(self):
-        x = carrier(self.currentLevel, (10,10))
-        validator = True
-        for price in x.cost:
-            if self.currentLevel.ressource[price] - x.cost[price] < 0:
-                validator = False
-        if validator:
-            self.currentLevel.movingSprite.add(x)
+if __name__ == "__main__":
+    x = main("moi")
